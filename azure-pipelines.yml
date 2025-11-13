@@ -4,28 +4,36 @@ trigger:
       - main
 
 variables:
-- group: terraform-backend
+  - group: terraform-backend
 
 pool:
-  name: Default
+  vmImage: 'ubuntu-latest'
 
 steps:
-- checkout: self
+  - checkout: self
 
-- script: terraform --version
-  displayName: 'Verifică versiunea Terraform'
+  - task: TerraformInstaller@1
+    inputs:
+      terraformVersion: 'latest'
 
-- script: |
-    set ARM_CLIENT_ID=%appId%
-    set ARM_CLIENT_SECRET=%password%
-    set ARM_TENANT_ID=%tenant%
-    set ARM_SUBSCRIPTION_ID=%subscriptionId%
+  - script: |
+      export ARM_CLIENT_ID=$(appId)
+      export ARM_CLIENT_SECRET=$(password)
+      export ARM_TENANT_ID=$(tenant)
+      export ARM_SUBSCRIPTION_ID=$(subscriptionId)
 
-    terraform init -reconfigure
-    terraform plan -out=tfplan
-  workingDirectory: terraform-azure
-  displayName: 'Terraform Init & Plan'
+      terraform --version
+      terraform init -reconfigure
+      terraform plan -out=tfplan
+    workingDirectory: terraform-azure
+    displayName: 'Terraform Init & Plan (Linux)'
 
-- script: terraform apply -auto-approve tfplan
-  workingDirectory: terraform-azure
-  displayName: 'Terraform Apply'
+  - script: |
+      export ARM_CLIENT_ID=$(appId)
+      export ARM_CLIENT_SECRET=$(password)
+      export ARM_TENANT_ID=$(tenant)
+      export ARM_SUBSCRIPTION_ID=$(subscriptionId)
+
+      terraform apply -auto-approve tfplan
+    workingDirectory: terraform-azure
+    displayName: 'Terraform Apply (Linux)'

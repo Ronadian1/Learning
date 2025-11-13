@@ -1,41 +1,38 @@
-trigger:
-  branches:
-    include:
-      - main
+provider "azurerm" {
+  features = {}
+  skip_provider_registration = true
+}
 
-# Variabilele vin din Azure DevOps Library (Variable Group)
-variables:
-  - group: terraform-backend
+resource "azurerm_resource_group" "rg" {
+  name     = "rg-terraform-test"
+  location = "germanywestcentral"
+}
 
-# Rulează pe agent hosted (DNS/Internet ok)
-pool:
-  vmImage: 'ubuntu-latest'
+resource "azurerm_virtual_network" "vnet" {
+  name                = "vnet-terraform"
+  address_space       = ["10.0.0.0/16"]
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+}
 
-steps:
-  - checkout: self
+resource "azurerm_subnet" "subnet" {
+  name                 = "subnet-terraform"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.1.0/24"]
+}
 
-  - task: TerraformInstaller@1
-    inputs:
-      terraformVersion: 'latest'
+resource "azurerm_storage_account" "st" {
+  name                     = "stterraform676436e2"
+  resource_group_name      = azurerm_resource_group.rg.name
+  location                 = azurerm_resource_group.rg.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+  enable_https_traffic_only = true
+}
 
-  - script: |
-      export ARM_CLIENT_ID=$(appId)
-      export ARM_CLIENT_SECRET=$(password)
-      export ARM_TENANT_ID=$(tenant)
-      export ARM_SUBSCRIPTION_ID=$(subscriptionId)
-
-      terraform -version
-      terraform init -reconfigure
-      terraform plan -out=tfplan
-    workingDirectory: terraform-azure
-    displayName: 'Terraform Init & Plan (Linux)'
-
-  - script: |
-      export ARM_CLIENT_ID=$(appId)
-      export ARM_CLIENT_SECRET=$(password)
-      export ARM_TENANT_ID=$(tenant)
-      export ARM_SUBSCRIPTION_ID=$(subscriptionId)
-
-      terraform apply -auto-approve tfplan
-    workingDirectory: terraform-azure
-    displayName: 'Terraform Apply (Linux)'
+resource "azurerm_storage_container" "tfstate" {
+  name                  = "tfstate"
+  storage_account_name  = azurerm_storage_account.st.name
+  container_access_type = "private"
+}
