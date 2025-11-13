@@ -1,0 +1,12 @@
+cat > .gitignore <<'EOF'
+# Terraform state files
+terraform.tfstate
+terraform.tfstate.backup
+
+# Local .terraform directory with plugins and lock file
+.terraform/
+.terraform.lock.hcl
+
+# Optional: crash log
+crash.log
+EOF
