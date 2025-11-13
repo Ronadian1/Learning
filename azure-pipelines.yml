@@ -7,33 +7,31 @@ variables:
   - group: terraform-backend
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: Default
 
 steps:
   - checkout: self
 
-  - task: TerraformInstaller@1
-    inputs:
-      terraformVersion: 'latest'
+  - script: terraform --version
+    displayName: 'Verifică versiunea Terraform'
 
   - script: |
-      export ARM_CLIENT_ID=$(appId)
-      export ARM_CLIENT_SECRET=$(password)
-      export ARM_TENANT_ID=$(tenant)
-      export ARM_SUBSCRIPTION_ID=$(subscriptionId)
+      set ARM_CLIENT_ID=%appId%
+      set ARM_CLIENT_SECRET=%password%
+      set ARM_TENANT_ID=%tenant%
+      set ARM_SUBSCRIPTION_ID=%subscriptionId%
 
-      terraform --version
       terraform init -reconfigure
       terraform plan -out=tfplan
     workingDirectory: terraform-azure
-    displayName: 'Terraform Init & Plan (Linux)'
+    displayName: 'Terraform Init & Plan (Windows)'
 
   - script: |
-      export ARM_CLIENT_ID=$(appId)
-      export ARM_CLIENT_SECRET=$(password)
-      export ARM_TENANT_ID=$(tenant)
-      export ARM_SUBSCRIPTION_ID=$(subscriptionId)
+      set ARM_CLIENT_ID=%appId%
+      set ARM_CLIENT_SECRET=%password%
+      set ARM_TENANT_ID=%tenant%
+      set ARM_SUBSCRIPTION_ID=%subscriptionId%
 
       terraform apply -auto-approve tfplan
     workingDirectory: terraform-azure
-    displayName: 'Terraform Apply (Linux)'
+    displayName: 'Terraform Apply (Windows)'
