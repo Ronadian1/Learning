@@ -19,8 +19,9 @@ steps:
     set ARM_CLIENT_ID=%appId%
     set ARM_CLIENT_SECRET=%password%
     set ARM_TENANT_ID=%tenant%
+    set ARM_SUBSCRIPTION_ID=%subscriptionId%
 
-    terraform init
+    terraform init -reconfigure
     terraform plan -out=tfplan
   workingDirectory: terraform-azure
   displayName: 'Terraform Init & Plan'
