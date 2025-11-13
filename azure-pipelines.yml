@@ -4,10 +4,10 @@ trigger:
       - main
 
 variables:
-- group: terraform-backend  # Variable Group cu credentialele SP
+- group: terraform-backend  # Variable Group din Library
 
 pool:
-  name: Local-Agent          # Numele pool-ului creat în Project Settings
+  name: Default              # Folosește agentul local din Default pool
 
 steps:
 - checkout: self
@@ -16,19 +16,14 @@ steps:
   displayName: 'Verifică versiunea Terraform'
 
 - script: |
-    echo "🔐 Autentificare cu SP"
-    echo "Client ID: $ARM_CLIENT_ID"
-    echo "Tenant ID: $ARM_TENANT_ID"
-    echo "Subscription ID: $ARM_SUBSCRIPTION_ID"
+    export ARM_CLIENT_ID=$appId
+    export ARM_CLIENT_SECRET=$password
+    export ARM_TENANT_ID=$tenant
 
-    echo "🌍 Terraform Init"
     terraform init
-
-    echo "📐 Terraform Plan"
     terraform plan -out=tfplan
   displayName: 'Terraform Init & Plan'
 
 - script: |
-    echo "🚀 Terraform Apply"
     terraform apply -auto-approve tfplan
   displayName: 'Terraform Apply'
