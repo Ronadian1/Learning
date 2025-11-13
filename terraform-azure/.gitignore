@@ -1,12 +1,26 @@
-cat > .gitignore <<'EOF'
 # Terraform state files
 terraform.tfstate
 terraform.tfstate.backup
 
-# Local .terraform directory with plugins and lock file
+# Local .terraform directory and lock
 .terraform/
 .terraform.lock.hcl
 
-# Optional: crash log
+# Local variable files and secrets
+terraform.tfvars
+*.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Debug and logs
 crash.log
-EOF
+tf-debug.txt
+
+# OS and editor files
+*.swp
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
