@@ -4,21 +4,31 @@ trigger:
       - main
 
 variables:
-- group: terraform-backend  # numele Variable Group-ului tău
+- group: terraform-backend  # Variable Group cu credentialele SP
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: Local-Agent          # Numele pool-ului creat în Project Settings
 
 steps:
-- task: TerraformInstaller@1
-  inputs:
-    terraformVersion: 'latest'
+- checkout: self
+
+- script: terraform --version
+  displayName: 'Verifică versiunea Terraform'
 
 - script: |
+    echo "🔐 Autentificare cu SP"
+    echo "Client ID: $ARM_CLIENT_ID"
+    echo "Tenant ID: $ARM_TENANT_ID"
+    echo "Subscription ID: $ARM_SUBSCRIPTION_ID"
+
+    echo "🌍 Terraform Init"
     terraform init
+
+    echo "📐 Terraform Plan"
     terraform plan -out=tfplan
   displayName: 'Terraform Init & Plan'
 
 - script: |
+    echo "🚀 Terraform Apply"
     terraform apply -auto-approve tfplan
   displayName: 'Terraform Apply'
