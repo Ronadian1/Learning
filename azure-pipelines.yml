@@ -4,10 +4,10 @@ trigger:
       - main
 
 variables:
-- group: terraform-backend  # Variable Group din Library
+- group: terraform-backend
 
 pool:
-  name: Default              # Folosește agentul local din Default pool
+  name: Default
 
 steps:
 - checkout: self
@@ -16,14 +16,15 @@ steps:
   displayName: 'Verifică versiunea Terraform'
 
 - script: |
-    export ARM_CLIENT_ID=$appId
-    export ARM_CLIENT_SECRET=$password
-    export ARM_TENANT_ID=$tenant
+    set ARM_CLIENT_ID=%appId%
+    set ARM_CLIENT_SECRET=%password%
+    set ARM_TENANT_ID=%tenant%
 
     terraform init
     terraform plan -out=tfplan
+  workingDirectory: terraform-azure
   displayName: 'Terraform Init & Plan'
 
-- script: |
-    terraform apply -auto-approve tfplan
+- script: terraform apply -auto-approve tfplan
+  workingDirectory: terraform-azure
   displayName: 'Terraform Apply'
